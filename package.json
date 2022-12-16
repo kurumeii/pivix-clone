@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "fullstack-build": "prisma generate && prisma migrate deploy && next build"
   },
   "dependencies": {
     "@next-auth/mongodb-adapter": "^1.1.1",
@@ -44,3 +45,4 @@
     "ts-node": "^10.9.1"
   }
 }
+
