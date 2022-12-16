@@ -14,14 +14,16 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "paths": {
-      "@/api/*": ["/src/pages/api/*"],
-      "@/auth/*": ["/src/pages/auth/*"],
-      "@/server/*": ["/src/server/*"],
-      "@/utils/*": ["/src/utils/*"]
-    }
+    "baseUrl": "src"
+    // "paths": {
+    //   "@/api/*": ["/pages/api/*"],
+    //   "@/auth/*": ["/pages/auth/*"],
+    //   "@/server/*": ["/server/*"],
+    //   "@/utils/*": ["/utils/*"],
+    //   "@/styles/*": ["/styles/*"]
+    // }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["next-env.d.ts", "**/*"],
   "exclude": ["node_modules"]
 }
 
