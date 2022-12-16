@@ -19,8 +19,8 @@ export const trpc = createTRPCNext<AppRouter>({
         }),
       ],
       transformer: superjson,
+      abortOnUnmount: true,
     }
   },
   ssr: false,
 })
-export const controller = new AbortController()

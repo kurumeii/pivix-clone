@@ -16,7 +16,10 @@ const errors = {
   EmailSignin: 'Check your email address.',
   CredentialsSignin: 'Sign in failed. Check the details you provided are correct.',
   default: 'Unable to sign in.',
-}
+} as const
+
+type ErrorType = keyof typeof errors
+type ErrorMsg = typeof errors[ErrorType]
 
 export const getServerSideProps = async () => {
   const providers = await getProviders()
@@ -30,11 +33,14 @@ export const getServerSideProps = async () => {
 function Signin({ providers }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter()
   const { query } = router
-  if (query.error) {
+
+  if (query.error && !Array.isArray(query.error)) {
+    const errorQuery: ErrorType = query.error as ErrorType
+    const text = errors[errorQuery]
     Toast.fire({
       icon: 'error',
-      title: `<h4 style='color: #d63051 !important'>There has been an error</h4>`,
-      text: errors[query.error],
+      title: `<h4 style='color: #d63051 !important'>There has been an error: </h4>`,
+      text,
     })
   }
   return (
