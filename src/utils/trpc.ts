@@ -5,7 +5,7 @@ import superjson from 'superjson'
 
 const getUrl = () => {
   if (typeof window === 'undefined') return ''
-  if (process.env.WEB_URL) return `https://${process.env.WEB_URL}`
+  if (process.env.NEXT_PUBLIC_WEB_URL) return `https://${process.env.NEXT_PUBLIC_WEB_URL}`
   return `http://localhost:${process.env.PORT ?? 3000}`
 }
 
