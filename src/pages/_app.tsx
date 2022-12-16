@@ -5,10 +5,16 @@ import type { AppProps } from 'next/app'
 import Swal from 'sweetalert2/dist/sweetalert2.js'
 import withReactContent from 'sweetalert2-react-content'
 import { trpc } from 'utils/trpc'
+import { ThemeProvider } from 'next-themes'
 
-const myTheme = createTheme({
+const lightTheme = createTheme({
+  type: 'light',
+})
+
+const darkTheme = createTheme({
   type: 'dark',
 })
+
 const swal = withReactContent(Swal)
 
 export const Toast = swal.mixin({
@@ -25,11 +31,20 @@ export const Toast = swal.mixin({
 
 function App({ Component, pageProps }: AppProps) {
   return (
-    <NextUIProvider theme={myTheme}>
-      <SessionProvider session={pageProps.session}>
-        <Component {...pageProps} />
-      </SessionProvider>
-    </NextUIProvider>
+    <ThemeProvider
+      defaultTheme='system'
+      attribute='class'
+      value={{
+        light: lightTheme.className,
+        dark: darkTheme.className,
+      }}
+    >
+      <NextUIProvider>
+        <SessionProvider session={pageProps.session}>
+          <Component {...pageProps} />
+        </SessionProvider>
+      </NextUIProvider>
+    </ThemeProvider>
   )
 }
 
