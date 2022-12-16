@@ -2,7 +2,7 @@ import { createTheme, NextUIProvider } from '@nextui-org/react'
 import '@sweetalert2/themes/dark/dark.scss'
 import { SessionProvider } from 'next-auth/react'
 import type { AppProps } from 'next/app'
-import Swal from 'sweetalert2'
+import Swal from 'sweetalert2/dist/sweetalert2.js'
 import withReactContent from 'sweetalert2-react-content'
 import { trpc } from 'utils/trpc'
 
