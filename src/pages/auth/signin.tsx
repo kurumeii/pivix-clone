@@ -1,11 +1,20 @@
-import { Button, Card, Grid, Text } from '@nextui-org/react'
+import { Button, Card, Col, Container, FormElement, Grid, Input, Loading, Row, Spacer, Text } from '@nextui-org/react'
+import { GetServerSidePropsContext } from 'next'
+import { GetServerSideProps } from 'next'
+import { unstable_getServerSession } from 'next-auth'
 import { getProviders, signIn } from 'next-auth/react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { InferGetServerSidePropsType } from 'next/types'
+import { authOpts } from 'pages/api/auth/[...nextauth]'
 import { Toast } from 'pages/_app'
+import { ChangeEvent, useEffect, useState } from 'react'
+import { trpc } from 'utils/trpc'
+import md5 from 'md5'
+import LoginField from 'components/Login/LoginField'
+import LoginButton from 'components/Login/LoginButton'
 
-const errors = {
+const customErrors = {
   Signin: 'Try signing with a different account.',
   OAuthSignin: 'Try signing with a different account.',
   OAuthCallback: 'Try signing with a different account.',
@@ -18,11 +27,23 @@ const errors = {
   default: 'Unable to sign in.',
 } as const
 
-type ErrorType = keyof typeof errors
-type ErrorMsg = typeof errors[ErrorType]
+type ErrorType = keyof typeof customErrors
+type ErrorMsg = typeof customErrors[ErrorType]
+type ErrorField = {
+  email: string[]
+  password: string[]
+}
 
-export const getServerSideProps = async () => {
-  const providers = await getProviders()
+export const getServerSideProps: GetServerSideProps = async ({ req, res }: GetServerSidePropsContext) => {
+  const [providers, session] = await Promise.all([getProviders(), unstable_getServerSession(req, res, authOpts)])
+  if (session) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: true,
+      },
+    }
+  }
   return {
     props: {
       providers,
@@ -33,16 +54,61 @@ export const getServerSideProps = async () => {
 function Signin({ providers }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter()
   const { query } = router
+  const [fieldValue, setFieldValue] = useState({
+    email: '',
+    password: '',
+  })
+  const [errorField, setErrorField] = useState<ErrorField>({
+    email: [],
+    password: [],
+  })
+
+  const { mutateAsync, isLoading, isError, error } = trpc.signin.submit.useMutation()
 
   if (query.error && !Array.isArray(query.error)) {
     const errorQuery: ErrorType = query.error as ErrorType
-    const text = errors[errorQuery]
+    const text = customErrors[errorQuery]
     Toast.fire({
       icon: 'error',
       title: `<h4 style='color: #d63051 !important'>There has been an error: </h4>`,
       text,
     })
   }
+
+  const changeField = (event: ChangeEvent<FormElement>) =>
+    setFieldValue(prev => {
+      return {
+        ...prev,
+        [event.currentTarget.name]: event.currentTarget.value,
+      }
+    })
+
+  const submitForm = async () => {
+    mutateAsync({
+      email: fieldValue.email,
+      password: md5(fieldValue.password),
+    })
+  }
+
+  useEffect(() => {
+    if (isError) {
+      if (!error.data?.zodError) {
+        return Toast.fire({
+          icon: 'error',
+          title: `<h4 style='color: #d63051 !important'>There has been an error: ${error.data?.code}</h4>`,
+          text: error.message,
+        })
+      }
+      const fieldErrors = error.data?.zodError?.fieldErrors
+      setErrorField(prev => {
+        return {
+          email: fieldErrors['email'] || [],
+          password: fieldErrors['password'] || [],
+        }
+      })
+    }
+  }, [error, isError])
+
   return (
     <>
       <Head>
@@ -58,15 +124,12 @@ function Signin({ providers }: InferGetServerSidePropsType<typeof getServerSideP
       >
         <Grid
           xs={10}
-          md={8}
-          lg={6}
+          sm={8}
+          md={5}
+          lg={4}
+          xl={3}
         >
-          <Card
-            variant='bordered'
-            css={{
-              w: '100%',
-            }}
-          >
+          <Card variant='bordered'>
             <Card.Header
               css={{
                 display: 'flex',
@@ -92,30 +155,73 @@ function Signin({ providers }: InferGetServerSidePropsType<typeof getServerSideP
               </Text>
             </Card.Header>
             <Card.Divider />
-            <Card.Body
-              css={{
-                py: '$10',
-                gap: '$10',
-              }}
-            >
-              {providers &&
-                Object.values(providers).map(provider => (
-                  <Button
-                    key={provider.id}
-                    shadow
-                    ghost
-                    size={'lg'}
-                    color={'gradient'}
-                    onPress={() => signIn(provider.id)}
-                  >
-                    <Text
-                      size={'$lg'}
-                      css={{ letterSpacing: '$wider' }}
+            <Card.Body>
+              <Container fluid>
+                {providers &&
+                  Object.values(providers).map(provider => (
+                    <Button
+                      key={provider.id}
+                      bordered
+                      ghost
+                      color='gradient'
+                      css={{
+                        my: '$5',
+                        w: '100%',
+                      }}
+                      onPress={() => signIn(provider.id)}
                     >
-                      Sign in with {provider.name}
-                    </Text>
-                  </Button>
+                      <Text
+                        size={'$lg'}
+                        css={{ letterSpacing: '$wider' }}
+                      >
+                        Sign in with {provider.name}
+                      </Text>
+                    </Button>
+                  ))}
+              </Container>
+              <Spacer y={0.5} />
+              <Text
+                h5
+                i
+                transform='uppercase'
+                css={{
+                  textAlign: 'center',
+                }}
+              >
+                or
+              </Text>
+              <Spacer y={0.5} />
+              <Text
+                h5
+                i
+                transform='uppercase'
+                css={{
+                  textAlign: 'center',
+                }}
+              >
+                Sign in with account
+              </Text>
+              <Spacer y={1} />
+              <Container
+                fluid
+                display='flex'
+              >
+                {Object.keys(fieldValue).map((field, i) => (
+                  <LoginField
+                    key={i}
+                    name={field}
+                    initialValue={fieldValue[field]}
+                    helperText={errorField[field][0]}
+                    labelPlaceholder={field.toUpperCase()}
+                    status={errorField[field].length === 0}
+                    onChange={event => changeField(event)}
+                  />
                 ))}
+                <LoginButton
+                  loading={isLoading}
+                  onPressHandler={submitForm}
+                />
+              </Container>
             </Card.Body>
           </Card>
         </Grid>

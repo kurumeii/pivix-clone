@@ -22,5 +22,5 @@ export const trpc = createTRPCNext<AppRouter>({
       abortOnUnmount: true,
     }
   },
-  ssr: true,
+  ssr: false,
 })

@@ -1,7 +1,7 @@
-import NextAuth, { NextAuthOptions } from 'next-auth'
-import GoogleProvider from 'next-auth/providers/google'
-import DiscrodProvider from 'next-auth/providers/discord'
 import { PrismaAdapter } from '@next-auth/prisma-adapter'
+import NextAuth, { NextAuthOptions } from 'next-auth'
+import DiscrodProvider from 'next-auth/providers/discord'
+import GoogleProvider from 'next-auth/providers/google'
 import { prismaClient } from 'utils/prismadb'
 
 export const authOpts: NextAuthOptions = {
@@ -20,6 +20,10 @@ export const authOpts: NextAuthOptions = {
     signIn: '/auth/signin',
   },
   callbacks: {
+    async signIn({ profile }) {
+      if (profile) return false
+      return true
+    },
     async redirect({ baseUrl, url }) {
       return baseUrl
     },

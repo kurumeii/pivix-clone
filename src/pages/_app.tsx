@@ -21,6 +21,7 @@ export const Toast = swal.mixin({
   toast: true,
   position: 'top',
   showConfirmButton: false,
+  showCloseButton: true,
   timer: 5000,
   timerProgressBar: true,
   didOpen: toast => {
@@ -31,20 +32,20 @@ export const Toast = swal.mixin({
 
 function App({ Component, pageProps }: AppProps) {
   return (
-    <ThemeProvider
-      defaultTheme='system'
-      attribute='class'
-      value={{
-        light: lightTheme.className,
-        dark: darkTheme.className,
-      }}
-    >
-      <NextUIProvider>
-        <SessionProvider session={pageProps.session}>
+    <SessionProvider session={pageProps.session}>
+      <ThemeProvider
+        defaultTheme='system'
+        attribute='class'
+        value={{
+          light: lightTheme.className,
+          dark: darkTheme.className,
+        }}
+      >
+        <NextUIProvider>
           <Component {...pageProps} />
-        </SessionProvider>
-      </NextUIProvider>
-    </ThemeProvider>
+        </NextUIProvider>
+      </ThemeProvider>
+    </SessionProvider>
   )
 }
 
