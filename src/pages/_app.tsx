@@ -1,11 +1,12 @@
 import { createTheme, NextUIProvider } from '@nextui-org/react'
 import '@sweetalert2/themes/dark/dark.scss'
+import type { Session } from 'next-auth'
 import { SessionProvider } from 'next-auth/react'
-import type { AppProps } from 'next/app'
-import Swal from 'sweetalert2/dist/sweetalert2.js'
-import withReactContent from 'sweetalert2-react-content'
-import { trpc } from 'utils/trpc'
 import { ThemeProvider } from 'next-themes'
+import type { AppType } from 'next/dist/pages/_app'
+import withReactContent from 'sweetalert2-react-content'
+import Swal from 'sweetalert2/dist/sweetalert2.js'
+import { trpc } from '../utils/trpc'
 
 const lightTheme = createTheme({
   type: 'light',
@@ -30,9 +31,12 @@ export const Toast = swal.mixin({
   },
 })
 
-function App({ Component, pageProps }: AppProps) {
+const App: AppType<{ session: Session | null }> = ({
+  Component,
+  pageProps: { session, ...pageProps },
+}) => {
   return (
-    <SessionProvider session={pageProps.session}>
+    <SessionProvider session={session}>
       <ThemeProvider
         defaultTheme='system'
         attribute='class'

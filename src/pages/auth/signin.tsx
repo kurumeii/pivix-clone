@@ -1,18 +1,20 @@
-import { Button, Card, Col, Container, FormElement, Grid, Input, Loading, Row, Spacer, Text } from '@nextui-org/react'
-import { GetServerSidePropsContext } from 'next'
-import { GetServerSideProps } from 'next'
+import type { FormElement } from '@nextui-org/react'
+import { Button, Card, Container, Grid, Spacer, Text } from '@nextui-org/react'
+import md5 from 'md5'
+import type { GetServerSidePropsContext } from 'next'
 import { unstable_getServerSession } from 'next-auth'
 import { getProviders, signIn } from 'next-auth/react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import { InferGetServerSidePropsType } from 'next/types'
-import { authOpts } from 'pages/api/auth/[...nextauth]'
-import { Toast } from 'pages/_app'
-import { ChangeEvent, useEffect, useState } from 'react'
-import { trpc } from 'utils/trpc'
-import md5 from 'md5'
-import LoginField from 'components/Login/LoginField'
-import LoginButton from 'components/Login/LoginButton'
+import type { InferGetServerSidePropsType } from 'next/types'
+
+import type { ChangeEvent } from 'react'
+import { useState } from 'react'
+import LoginButton from '../../components/Login/LoginButton'
+import LoginField from '../../components/Login/LoginField'
+import { trpc } from '../../utils/trpc'
+import { authOpts } from '../api/auth/[...nextauth]'
+import { Toast } from '../_app'
 
 const customErrors = {
   Signin: 'Try signing with a different account.',
@@ -28,14 +30,30 @@ const customErrors = {
 } as const
 
 type ErrorType = keyof typeof customErrors
-type ErrorMsg = typeof customErrors[ErrorType]
-type ErrorField = {
-  email: string[]
-  password: string[]
+
+interface FieldValue {
+  'email': string
+  'password': string
 }
 
-export const getServerSideProps: GetServerSideProps = async ({ req, res }: GetServerSidePropsContext) => {
-  const [providers, session] = await Promise.all([getProviders(), unstable_getServerSession(req, res, authOpts)])
+interface ErrorField {
+  'email': string[]
+  'password': string[]
+}
+
+const initFieldVal: FieldValue = {
+  email: '',
+  password: '',
+}
+
+const initErrorField: ErrorField = {
+  email: [],
+  password: [],
+}
+
+export const getServerSideProps = async ({ req, res }: GetServerSidePropsContext) => {
+  const providers = await getProviders()
+  const session = await unstable_getServerSession(req, res, authOpts)
   if (session) {
     return {
       redirect: {
@@ -54,16 +72,25 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }: GetSe
 function Signin({ providers }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter()
   const { query } = router
-  const [fieldValue, setFieldValue] = useState({
-    email: '',
-    password: '',
-  })
-  const [errorField, setErrorField] = useState<ErrorField>({
-    email: [],
-    password: [],
-  })
+  const [fieldValue, setFieldValue] = useState(initFieldVal)
+  const [errorField, setErrorField] = useState(initErrorField)
 
-  const { mutateAsync, isLoading, isError, error } = trpc.signin.submit.useMutation()
+  const { mutate, isLoading, reset } = trpc.signin.submit.useMutation({
+    onError(error) {
+      if (!error.data?.zodError) {
+        return Toast.fire({
+          icon: 'error',
+          title: `<h4 style='color: #d63051 !important'>There has been an error: ${error.data?.code}</h4>`,
+          text: error.message,
+        })
+      }
+      const fieldErrors = error.data?.zodError?.fieldErrors
+      setErrorField({
+        email: fieldErrors['email'] || [],
+        password: fieldErrors['password'] || [],
+      })
+    },
+  })
 
   if (query.error && !Array.isArray(query.error)) {
     const errorQuery: ErrorType = query.error as ErrorType
@@ -79,35 +106,9 @@ function Signin({ providers }: InferGetServerSidePropsType<typeof getServerSideP
     setFieldValue(prev => {
       return {
         ...prev,
-        [event.currentTarget.name]: event.currentTarget.value,
+        [event.target.name]: event.target.value,
       }
     })
-
-  const submitForm = async () => {
-    mutateAsync({
-      email: fieldValue.email,
-      password: md5(fieldValue.password),
-    })
-  }
-
-  useEffect(() => {
-    if (isError) {
-      if (!error.data?.zodError) {
-        return Toast.fire({
-          icon: 'error',
-          title: `<h4 style='color: #d63051 !important'>There has been an error: ${error.data?.code}</h4>`,
-          text: error.message,
-        })
-      }
-      const fieldErrors = error.data?.zodError?.fieldErrors
-      setErrorField(prev => {
-        return {
-          email: fieldErrors['email'] || [],
-          password: fieldErrors['password'] || [],
-        }
-      })
-    }
-  }, [error, isError])
 
   return (
     <>
@@ -210,16 +211,22 @@ function Signin({ providers }: InferGetServerSidePropsType<typeof getServerSideP
                   <LoginField
                     key={i}
                     name={field}
-                    initialValue={fieldValue[field]}
-                    helperText={errorField[field][0]}
+                    initialValue={fieldValue[field as keyof FieldValue]}
+                    helperText={errorField[field as keyof ErrorField][0]}
                     labelPlaceholder={field.toUpperCase()}
-                    status={errorField[field].length === 0}
+                    status={errorField[field as keyof ErrorField].length === 0}
                     onChange={event => changeField(event)}
                   />
                 ))}
                 <LoginButton
                   loading={isLoading}
-                  onPressHandler={submitForm}
+                  onPressHandler={() => {
+                    mutate({
+                      email: fieldValue.email,
+                      password: md5(fieldValue.password),
+                    })
+                    reset()
+                  }}
                 />
               </Container>
             </Card.Body>

@@ -1,8 +1,6 @@
-import { Prisma } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
-import { procedure, router } from 'server/trpcs'
-import { prismaClient } from 'utils/prismadb'
 import { z } from 'zod'
+import { procedure, router } from '../trpc'
 
 export const signinRouter = router({
   submit: procedure
@@ -21,9 +19,9 @@ export const signinRouter = router({
           }),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const { email, password } = input
-      const FindUserIdByEmail = await prismaClient.user.findUnique({
+      const FindUserIdByEmail = await ctx.prisma.user.findUnique({
         select: {
           id: true,
         },
@@ -37,7 +35,7 @@ export const signinRouter = router({
           message: 'Email not found',
         })
 
-      const OAuthResult = await prismaClient.account.findFirst({
+      const OAuthResult = await ctx.prisma.account.findFirst({
         select: {
           provider: true,
         },
@@ -54,7 +52,9 @@ export const signinRouter = router({
             message: `Email has already been linked with ${OAuthResult?.provider} provider`,
           })
       }
-      const FindUserByEmailAndPass = await prismaClient.user.findFirst({ where: { email, password } })
+      const FindUserByEmailAndPass = await ctx.prisma.user.findFirst({
+        where: { email, password },
+      })
       if (!FindUserByEmailAndPass)
         throw new TRPCError({
           code: 'NOT_FOUND',

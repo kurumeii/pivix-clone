@@ -1,4 +1,4 @@
-import { router } from 'server/trpcs'
+import { router } from '../trpc'
 import { homeRouter } from './home'
 import { signinRouter } from './signin'
 

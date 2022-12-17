@@ -1,50 +1,34 @@
 import { Button, Container, Loading, Text } from '@nextui-org/react'
-import LoadingPage from 'components/LoadingPage'
+
 import { signIn, signOut, useSession } from 'next-auth/react'
-import Head from 'next/head'
 import { useRouter } from 'next/dist/client/router'
-import { trpc } from 'utils/trpc'
+import Head from 'next/head'
+import LoadingPage from '../components/LoadingPage'
+import { trpc } from '../utils/trpc'
 import { Toast } from './_app'
 
 function Homepage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const { isLoading, mutateAsync } = trpc.home.unlinkAccount.useMutation({
+
+  const { isLoading, mutate, reset } = trpc.home.unlinkAccount.useMutation({
     onError(error) {
       Toast.fire({
         icon: 'error',
-        title: `<h4 style='color: #d63051 !important'>There has been an error</h4>`,
+        title: `<h4 style='color: #d63051 !important'>There has been an error: ${error.data?.code}</h4>`,
         text: error.message,
       })
     },
-    async onSuccess(data, variables, context) {
+    async onSuccess({ resultMess }) {
       const { isDismissed } = await Toast.fire({
         timer: 2000,
         icon: 'success',
         title: `<h4 style='color: #76B947 !important'>Success</h4>`,
-        text: data.resultMess,
+        text: resultMess,
       })
       if (isDismissed) return router.reload()
     },
   })
-  const unlinkAcc = () => {
-    if (!session) {
-      return Toast.fire({
-        icon: 'error',
-        title: `<h4 style='color: #d63051 !important'>There has been an error</h4>`,
-        text: 'Session timed out',
-      })
-    } else if (!session.user || !session.user.email) {
-      return Toast.fire({
-        icon: 'error',
-        title: `<h4 style='color: #d63051 !important'>There has been an error</h4>`,
-        text: 'Cannot find user information please reload page or log in again',
-      })
-    }
-    mutateAsync({
-      email: session.user.email,
-    })
-  }
 
   if (status === 'loading') return <LoadingPage />
 
@@ -111,7 +95,13 @@ function Homepage() {
                 textTransform: 'uppercase',
                 my: '$10',
               }}
-              onPress={() => unlinkAcc()}
+              onPress={() => {
+                if (!session.user.email) return
+                mutate({
+                  email: session.user.email,
+                })
+                reset()
+              }}
               disabled={isLoading}
             >
               {isLoading && (

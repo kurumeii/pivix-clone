@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -14,16 +14,9 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "baseUrl": "src"
-    // "paths": {
-    //   "@/api/*": ["/pages/api/*"],
-    //   "@/auth/*": ["/pages/auth/*"],
-    //   "@/server/*": ["/server/*"],
-    //   "@/utils/*": ["/utils/*"],
-    //   "@/styles/*": ["/styles/*"]
-    // }
+    "noUncheckedIndexedAccess": true
   },
-  "include": ["next-env.d.ts", "**/*"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js"],
   "exclude": ["node_modules"]
 }
 

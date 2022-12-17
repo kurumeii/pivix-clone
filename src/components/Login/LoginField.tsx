@@ -1,16 +1,17 @@
-import { Col, FormElement, Input, Row } from '@nextui-org/react'
-import { ChangeEvent, FC } from 'react'
+import type { FormElement } from '@nextui-org/react'
+import { Col, Input, Row } from '@nextui-org/react'
+import type { ChangeEvent } from 'react'
 
 export type FieldProps = {
-  name: 'email' | 'password'
+  name: string
   status?: boolean
   helperText?: string
-  labelPlaceholder?: 'email' | 'password'
+  labelPlaceholder?: string
   initialValue: string
-  onChange?: ChangeEvent<FormElement>
+  onChange?: ((e: ChangeEvent<FormElement>) => void) | undefined
 }
 
-function LoginField(props: FieldProps): FC {
+function LoginField(props: FieldProps) {
   return (
     <>
       <Row fluid>
@@ -22,7 +23,12 @@ function LoginField(props: FieldProps): FC {
         >
           {props.name === 'password' ? (
             <Input.Password
-              {...props}
+              name={props.name}
+              status={props.status ? 'error' : 'default'}
+              helperText={props.helperText}
+              labelPlaceholder={props.labelPlaceholder}
+              initialValue={props.initialValue}
+              onChange={props.onChange}
               autoComplete='off'
               clearable
               bordered
@@ -34,7 +40,12 @@ function LoginField(props: FieldProps): FC {
             />
           ) : (
             <Input
-              {...props}
+              name={props.name}
+              status={props.status ? 'error' : 'default'}
+              helperText={props.helperText}
+              labelPlaceholder={props.labelPlaceholder}
+              initialValue={props.initialValue}
+              onChange={props.onChange}
               autoComplete='off'
               clearable
               bordered

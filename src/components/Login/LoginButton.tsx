@@ -1,12 +1,11 @@
 import { Button, Col, Loading, Row, Text } from '@nextui-org/react'
-import React, { FC } from 'react'
 
 interface ButtonProp {
-  onPressHandler: () => Promise<void>
+  onPressHandler: () => void
   loading: boolean
 }
 
-function LoginButton({ loading, onPressHandler }: ButtonProp): FC {
+function LoginButton({ loading, onPressHandler }: ButtonProp) {
   return (
     <>
       <Row fluid>

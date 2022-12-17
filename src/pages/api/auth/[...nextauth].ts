@@ -1,11 +1,12 @@
 import { PrismaAdapter } from '@next-auth/prisma-adapter'
-import NextAuth, { NextAuthOptions } from 'next-auth'
+import type { NextAuthOptions } from 'next-auth'
+import NextAuth from 'next-auth/next'
 import DiscrodProvider from 'next-auth/providers/discord'
 import GoogleProvider from 'next-auth/providers/google'
-import { prismaClient } from 'utils/prismadb'
+import { prisma } from '../../../server/database/prismadb'
 
 export const authOpts: NextAuthOptions = {
-  adapter: PrismaAdapter(prismaClient),
+  adapter: PrismaAdapter(prisma),
   providers: [
     DiscrodProvider({
       clientId: process.env.DISCORD_ID || '',
@@ -20,16 +21,27 @@ export const authOpts: NextAuthOptions = {
     signIn: '/auth/signin',
   },
   callbacks: {
-    async signIn({ profile }) {
-      if (profile) return false
-      return true
+    async signIn({ user }) {
+      debugger
+      if (user.email) {
+        return true
+      } else {
+        // Return false to display a default error message
+        return false
+        // Or you can return a URL to redirect to:
+        // return '/unauthorized'
+      }
     },
-    async redirect({ baseUrl, url }) {
-      return baseUrl
-    },
-    async session({ session, token, user }) {
+    async session({ session, user }) {
       session.user.id = user.id
       return session
+    },
+    redirect({ baseUrl, url }) {
+      // Allows relative callback URLs
+      if (url.startsWith('/')) return `${baseUrl}${url}`
+      // Allows callback URLs on the same origin
+      else if (new URL(url).origin === baseUrl) return url
+      return baseUrl
     },
   },
 }

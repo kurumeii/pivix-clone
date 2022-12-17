@@ -1,6 +1,6 @@
 import { CssBaseline } from '@nextui-org/react'
-import { DocumentContext, DocumentInitialProps } from 'next/dist/pages/_document'
-import Document, { Html, Head, Main, NextScript } from 'next/document'
+import type { DocumentContext, DocumentInitialProps } from 'next/dist/pages/_document'
+import Document, { Head, Html, Main, NextScript } from 'next/document'
 import { Children } from 'react'
 
 class MyDocument extends Document {
