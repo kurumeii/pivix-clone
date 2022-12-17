@@ -24,7 +24,7 @@ function LoginField(props: FieldProps) {
           {props.name === 'password' ? (
             <Input.Password
               name={props.name}
-              status={props.status ? 'error' : 'default'}
+              status={props.status ? 'default' : 'error'}
               helperText={props.helperText}
               labelPlaceholder={props.labelPlaceholder}
               initialValue={props.initialValue}
@@ -41,7 +41,7 @@ function LoginField(props: FieldProps) {
           ) : (
             <Input
               name={props.name}
-              status={props.status ? 'error' : 'default'}
+              status={props.status ? 'default' : 'error'}
               helperText={props.helperText}
               labelPlaceholder={props.labelPlaceholder}
               initialValue={props.initialValue}

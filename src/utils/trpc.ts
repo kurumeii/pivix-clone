@@ -33,37 +33,11 @@ export const trpc = createTRPCNext<AppRouter, SSRContext>({
           },
         }),
       ],
-      queryClientConfig: {
-        defaultOptions: {
-          queries: {
-            staleTime: 60 * 60 * 2,
-          },
-        },
-      },
       transformer: superjson,
       abortOnUnmount: true,
     }
   },
   ssr: true,
-  responseMeta(opts) {
-    const ctx = opts.ctx as SSRContext
-    if (ctx.status) {
-      return {
-        status: ctx.status,
-      }
-    }
-    const error = opts.clientErrors[0]
-    if (error) {
-      return {
-        status: error.data?.httpStatus ?? 500,
-      }
-    }
-    return {
-      headers: {
-        'cache-control': `s-maxage=1, stale-while-revalidate=${60 * 60 * 12}`,
-      },
-    }
-  },
 })
 
 export type RouterInput = inferRouterInputs<AppRouter>
