@@ -1,22 +1,19 @@
-import type { FormElement } from '@nextui-org/react'
-import { Button, Card, Container, Grid, Spacer, Text } from '@nextui-org/react'
-import md5 from 'md5'
+import { Button, Card, Container, Grid, Spacer, Text, useTheme } from '@nextui-org/react'
 import type { GetServerSidePropsContext } from 'next'
 import { unstable_getServerSession } from 'next-auth'
-import { getProviders, signIn } from 'next-auth/react'
+import { getProviders, signIn, getCsrfToken } from 'next-auth/react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import type { InferGetServerSidePropsType } from 'next/types'
-
-import type { ChangeEvent } from 'react'
 import { useState } from 'react'
 import LoginButton from '../../components/Login/LoginButton'
 import LoginField from '../../components/Login/LoginField'
+import type { CustomErrorMessage } from '../../interfaces/constants'
+import { Toast } from '../../utils/swal'
 import { trpc } from '../../utils/trpc'
 import { authOpts } from '../api/auth/[...nextauth]'
-import { Toast } from '../_app'
 
-const customErrors = {
+const customErrors: CustomErrorMessage = {
   Signin: 'Try signing with a different account.',
   OAuthSignin: 'Try signing with a different account.',
   OAuthCallback: 'Try signing with a different account.',
@@ -27,33 +24,17 @@ const customErrors = {
   EmailSignin: 'Check your email address.',
   CredentialsSignin: 'Sign in failed. Check the details you provided are correct.',
   default: 'Unable to sign in.',
-} as const
-
-type ErrorType = keyof typeof customErrors
-
-interface FieldValue {
-  'email': string
-  'password': string
 }
 
-interface ErrorField {
-  'email': string[]
-  'password': string[]
-}
-
-const initFieldVal: FieldValue = {
-  email: '',
-  password: '',
-}
-
-const initErrorField: ErrorField = {
-  email: [],
-  password: [],
-}
-
-export const getServerSideProps = async ({ req, res }: GetServerSidePropsContext) => {
-  const providers = await getProviders()
-  const session = await unstable_getServerSession(req, res, authOpts)
+export const getServerSideProps = async (context: GetServerSidePropsContext) => {
+  const { req, res } = context
+  const [providers, session, csrfToken] = await Promise.all([
+    await getProviders(),
+    await unstable_getServerSession(req, res, authOpts),
+    await getCsrfToken(context),
+  ])
+  // const providers = await getProviders()
+  // const session = await unstable_getServerSession(req, res, authOpts)
   if (session) {
     return {
       redirect: {
@@ -65,6 +46,7 @@ export const getServerSideProps = async ({ req, res }: GetServerSidePropsContext
   return {
     props: {
       providers,
+      csrfToken,
     },
   }
 }
@@ -72,28 +54,14 @@ export const getServerSideProps = async ({ req, res }: GetServerSidePropsContext
 function Signin({ providers }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter()
   const { query } = router
-  const [fieldValue, setFieldValue] = useState(initFieldVal)
-  const [errorField, setErrorField] = useState(initErrorField)
+  const { isDark } = useTheme()
+  const [fieldValue, setFieldValue] = useState('')
+  const [errorField, setErrorField] = useState([])
 
-  const { mutate, isLoading, reset } = trpc.signin.submit.useMutation({
-    onError(error) {
-      if (!error.data?.zodError) {
-        return Toast.fire({
-          icon: 'error',
-          title: `<h4 style='color: #d63051 !important'>There has been an error: ${error.data?.code}</h4>`,
-          text: error.message,
-        })
-      }
-      const fieldErrors = error.data?.zodError?.fieldErrors
-      setErrorField({
-        email: fieldErrors['email'] || [],
-        password: fieldErrors['password'] || [],
-      })
-    },
-  })
+  const { isLoading } = trpc.signin.submit.useMutation()
 
   if (query.error && !Array.isArray(query.error)) {
-    const errorQuery: ErrorType = query.error as ErrorType
+    const errorQuery = query.error as keyof typeof customErrors
     const text = customErrors[errorQuery]
     Toast.fire({
       icon: 'error',
@@ -101,14 +69,6 @@ function Signin({ providers }: InferGetServerSidePropsType<typeof getServerSideP
       text,
     })
   }
-
-  const changeField = (event: ChangeEvent<FormElement>) =>
-    setFieldValue(prev => {
-      return {
-        ...prev,
-        [event.target.name]: event.target.value,
-      }
-    })
 
   return (
     <>
@@ -130,7 +90,7 @@ function Signin({ providers }: InferGetServerSidePropsType<typeof getServerSideP
           lg={4}
           xl={3}
         >
-          <Card variant='bordered'>
+          <Card variant={isDark ? 'bordered' : 'shadow'}>
             <Card.Header
               css={{
                 display: 'flex',
@@ -159,26 +119,26 @@ function Signin({ providers }: InferGetServerSidePropsType<typeof getServerSideP
             <Card.Body>
               <Container fluid>
                 {providers &&
-                  Object.values(providers).map(provider => (
-                    <Button
-                      key={provider.id}
-                      bordered
-                      ghost
-                      color='gradient'
-                      css={{
-                        my: '$5',
-                        w: '100%',
-                      }}
-                      onPress={() => signIn(provider.id)}
-                    >
-                      <Text
-                        size={'$lg'}
-                        css={{ letterSpacing: '$wider' }}
-                      >
-                        Sign in with {provider.name}
-                      </Text>
-                    </Button>
-                  ))}
+                  Object.values(providers).map(
+                    provider =>
+                      provider.type !== 'email' && (
+                        <Button
+                          key={provider.id}
+                          bordered
+                          ghost
+                          color='gradient'
+                          css={{
+                            my: '$5',
+                            w: '100%',
+                            fontSize: '$lg',
+                            letterSpacing: '$wider',
+                          }}
+                          onPress={() => signIn(provider.id)}
+                        >
+                          Sign in with {provider.name}
+                        </Button>
+                      )
+                  )}
               </Container>
               <Spacer y={0.5} />
               <Text
@@ -200,33 +160,30 @@ function Signin({ providers }: InferGetServerSidePropsType<typeof getServerSideP
                   textAlign: 'center',
                 }}
               >
-                Sign in with account
+                Sign in with email
               </Text>
               <Spacer y={1} />
               <Container
                 fluid
                 display='flex'
               >
-                {Object.keys(fieldValue).map((field, i) => (
-                  <LoginField
-                    key={i}
-                    name={field}
-                    initialValue={fieldValue[field as keyof FieldValue]}
-                    helperText={errorField[field as keyof ErrorField][0]}
-                    labelPlaceholder={field.toUpperCase()}
-                    status={errorField[field as keyof ErrorField].length === 0}
-                    onChange={event => changeField(event)}
-                  />
-                ))}
+                <LoginField
+                  name={'email'}
+                  initialValue={fieldValue}
+                  helperText={errorField[0]}
+                  labelPlaceholder={'Email'}
+                  hasError={errorField.length !== 0}
+                  onChange={e => setFieldValue(e.target.value)}
+                  clearValue={() => setErrorField([])}
+                />
+
                 <LoginButton
                   loading={isLoading}
-                  onPressHandler={() => {
-                    mutate({
-                      email: fieldValue.email,
-                      password: md5(fieldValue.password),
+                  onPressHandler={() =>
+                    signIn('email', {
+                      email: fieldValue,
                     })
-                    reset()
-                  }}
+                  }
                 />
               </Container>
             </Card.Body>

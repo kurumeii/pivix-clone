@@ -1,38 +1,30 @@
-import type { FormElement } from '@nextui-org/react'
-import { Col, Input, Row } from '@nextui-org/react'
-import type { ChangeEvent } from 'react'
-
-export type FieldProps = {
-  name: string
-  status?: boolean
-  helperText?: string
-  labelPlaceholder?: string
-  initialValue: string
-  onChange?: ((e: ChangeEvent<FormElement>) => void) | undefined
-}
+import { Col, Input, Row, useTheme } from '@nextui-org/react'
+import type { FieldProps } from '../../interfaces/constants'
 
 function LoginField(props: FieldProps) {
+  const { isDark } = useTheme()
   return (
     <>
       <Row fluid>
         <Col
           css={{
-            pb: '$20',
+            py: '$12',
           }}
           span={12}
         >
-          {props.name === 'password' ? (
+          {props.name === 'password' || props.name === 'retypepw' ? (
             <Input.Password
               name={props.name}
-              status={props.status ? 'default' : 'error'}
+              status={props.hasError ? 'error' : 'default'}
               helperText={props.helperText}
+              helperColor={props.hasError ? 'error' : 'default'}
               labelPlaceholder={props.labelPlaceholder}
               initialValue={props.initialValue}
               onChange={props.onChange}
+              onClearClick={props.clearValue}
               autoComplete='off'
               clearable
-              bordered
-              color='primary'
+              bordered={isDark}
               size='lg'
               css={{
                 width: '100%',
@@ -41,15 +33,16 @@ function LoginField(props: FieldProps) {
           ) : (
             <Input
               name={props.name}
-              status={props.status ? 'default' : 'error'}
+              status={props.hasError ? 'error' : 'default'}
               helperText={props.helperText}
+              helperColor={props.hasError ? 'error' : 'default'}
               labelPlaceholder={props.labelPlaceholder}
               initialValue={props.initialValue}
               onChange={props.onChange}
+              onClearClick={props.clearValue}
               autoComplete='off'
               clearable
-              bordered
-              color='primary'
+              bordered={isDark}
               size='lg'
               css={{
                 width: '100%',

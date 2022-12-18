@@ -3,6 +3,7 @@ import type { NextAuthOptions } from 'next-auth'
 import NextAuth from 'next-auth/next'
 import DiscrodProvider from 'next-auth/providers/discord'
 import GoogleProvider from 'next-auth/providers/google'
+import MailProvider from 'next-auth/providers/email'
 import { prisma } from '../../../server/database/prismadb'
 
 export const authOpts: NextAuthOptions = {
@@ -16,32 +17,31 @@ export const authOpts: NextAuthOptions = {
       clientId: process.env.GOOGLE_ID || '',
       clientSecret: process.env.GOOGLE_SECRET || '',
     }),
+    MailProvider({
+      server: {
+        host: process.env.EMAIL_SERVER_HOST,
+        port: process.env.EMAIL_SERVER_PORT,
+        auth: {
+          user: process.env.EMAIL_SERVER_USER,
+          pass: process.env.EMAIL_SERVER_PASSWORD,
+        },
+      },
+      from: process.env.EMAIL_FROM,
+      maxAge: 60 * 60 * 2,
+    }),
   ],
   pages: {
     signIn: '/auth/signin',
   },
   callbacks: {
-    async signIn({ user }) {
-      debugger
-      if (user.email) {
-        return true
-      } else {
-        // Return false to display a default error message
-        return false
-        // Or you can return a URL to redirect to:
-        // return '/unauthorized'
+    async session({ session, token }) {
+      // Send properties to the client, like an access_token and user id from a provider.
+      if (token.id && token.accessToken) {
+        session.accessToken = token.accessToken
+        session.user.id = token.id
       }
-    },
-    async session({ session, user }) {
-      session.user.id = user.id
+
       return session
-    },
-    redirect({ baseUrl, url }) {
-      // Allows relative callback URLs
-      if (url.startsWith('/')) return `${baseUrl}${url}`
-      // Allows callback URLs on the same origin
-      else if (new URL(url).origin === baseUrl) return url
-      return baseUrl
     },
   },
 }

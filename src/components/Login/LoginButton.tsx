@@ -1,4 +1,4 @@
-import { Button, Col, Loading, Row, Text } from '@nextui-org/react'
+import { Button, Col, Loading, Row } from '@nextui-org/react'
 
 interface ButtonProp {
   onPressHandler: () => void
@@ -17,21 +17,18 @@ function LoginButton({ loading, onPressHandler }: ButtonProp) {
             disabled={loading}
             css={{
               w: '100%',
+              fontSize: '$lg',
+              letterSpacing: '$wider',
             }}
           >
             {loading ? (
               <Loading
                 type='spinner'
                 color='currentColor'
-                size='md'
+                size='lg'
               />
             ) : (
-              <Text
-                size={'$lg'}
-                css={{ letterSpacing: '$wider' }}
-              >
-                Submit
-              </Text>
+              <>Submit</>
             )}
           </Button>
         </Col>

@@ -4,8 +4,8 @@ import { signIn, signOut, useSession } from 'next-auth/react'
 import { useRouter } from 'next/dist/client/router'
 import Head from 'next/head'
 import LoadingPage from '../components/LoadingPage'
+import { Toast } from '../utils/swal'
 import { trpc } from '../utils/trpc'
-import { Toast } from './_app'
 
 function Homepage() {
   const { data: session, status } = useSession()
@@ -67,7 +67,7 @@ function Homepage() {
                 py: '$10',
               }}
             >
-              Welcome {session.user?.name}
+              Welcome {session.user.name}
             </Text>
             <Button
               color={'error'}
@@ -110,7 +110,7 @@ function Homepage() {
                   size='sm'
                 />
               )}
-              Unlink this account (will delete user from database)
+              Unlink this account
             </Button>
           </>
         )}
