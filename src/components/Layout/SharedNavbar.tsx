@@ -151,7 +151,6 @@ function SharedNavbar() {
                   Profile
                 </Dropdown.Item>
                 <Dropdown.Item
-                  as='button'
                   key={'signout'}
                   variant='shadow'
                   color='error'
