@@ -1,7 +1,7 @@
 import { Button, Card, Container, Grid, Spacer, Text, useTheme } from '@nextui-org/react'
 import type { GetServerSidePropsContext } from 'next'
 import { unstable_getServerSession } from 'next-auth'
-import { getProviders, signIn, getCsrfToken } from 'next-auth/react'
+import { getProviders, signIn } from 'next-auth/react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import type { InferGetServerSidePropsType } from 'next/types'
@@ -9,7 +9,7 @@ import { useState } from 'react'
 import LoginButton from '../../components/Login/LoginButton'
 import LoginField from '../../components/Login/LoginField'
 import type { CustomErrorMessage } from '../../interfaces/constants'
-import { Toast } from '../../utils/swal'
+import { errorTitle, Toast } from '../../utils/swal'
 import { trpc } from '../../utils/trpc'
 import { authOpts } from '../api/auth/[...nextauth]'
 
@@ -28,25 +28,21 @@ const customErrors: CustomErrorMessage = {
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
   const { req, res } = context
-  const [providers, session, csrfToken] = await Promise.all([
+  const [providers, session] = await Promise.all([
     await getProviders(),
     await unstable_getServerSession(req, res, authOpts),
-    await getCsrfToken(context),
   ])
-  // const providers = await getProviders()
-  // const session = await unstable_getServerSession(req, res, authOpts)
-  if (session) {
+  if (session !== null) {
     return {
       redirect: {
         destination: '/',
-        permanent: true,
+        permanent: false,
       },
     }
   }
   return {
     props: {
       providers,
-      csrfToken,
     },
   }
 }
@@ -57,16 +53,23 @@ function Signin({ providers }: InferGetServerSidePropsType<typeof getServerSideP
   const { isDark } = useTheme()
   const [fieldValue, setFieldValue] = useState('')
   const [errorField, setErrorField] = useState([])
+  const [shown, setShown] = useState(false)
+  const { isLoading, isError, error } = trpc.signin.submit.useMutation()
 
-  const { isLoading } = trpc.signin.submit.useMutation()
-
-  if (query.error && !Array.isArray(query.error)) {
+  if (query.error && !Array.isArray(query.error) && !shown) {
     const errorQuery = query.error as keyof typeof customErrors
     const text = customErrors[errorQuery]
     Toast.fire({
       icon: 'error',
-      title: `<h4 style='color: #d63051 !important'>There has been an error: </h4>`,
-      text,
+      title: errorTitle(text),
+    })
+    setShown(true)
+  }
+
+  if (isError) {
+    Toast.fire({
+      icon: 'error',
+      title: errorTitle(error.message),
     })
   }
 

@@ -1,122 +1,77 @@
-import { Button, Container, Loading, Text } from '@nextui-org/react'
+import { Spacer, Text } from '@nextui-org/react'
 
-import { signIn, signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/dist/client/router'
 import Head from 'next/head'
+import type { ReactElement } from 'react'
+import Layout from '../components/Layout/Layout'
 import LoadingPage from '../components/LoadingPage'
-import { Toast } from '../utils/swal'
+import type { NextPageWithLayout } from '../types/page'
+import { errorTitle, successTitle, Toast } from '../utils/swal'
+import { Box } from '../utils/themes'
 import { trpc } from '../utils/trpc'
 
-function Homepage() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
+const Homepage: NextPageWithLayout = () => {
+  const { status } = useSession()
+  // const router = useRouter()
 
-  const { isLoading, mutate, reset } = trpc.home.unlinkAccount.useMutation({
-    onError(error) {
-      Toast.fire({
-        icon: 'error',
-        title: `<h4 style='color: #d63051 !important'>There has been an error: ${error.data?.code}</h4>`,
-        text: error.message,
-      })
-    },
-    async onSuccess({ resultMess }) {
-      const { isDismissed } = await Toast.fire({
-        timer: 2000,
-        icon: 'success',
-        title: `<h4 style='color: #76B947 !important'>Success</h4>`,
-        text: resultMess,
-      })
-      if (isDismissed) return router.reload()
-    },
-  })
+  // const { isLoading, mutate, reset } = trpc.home.unlinkAccount.useMutation({
+  //   onError(error) {
+  //     Toast.fire({
+  //       icon: 'error',
+  //       title: errorTitle(error.data?.code),
+  //       text: error.message,
+  //     })
+  //   },
+  //   async onSuccess({ resultMess }) {
+  //     const { isDismissed } = await Toast.fire({
+  //       timer: 2000,
+  //       icon: 'success',
+  //       title: successTitle('Success'),
+  //       text: resultMess,
+  //     })
+  //     if (isDismissed) return router.reload()
+  //   },
+  // })
 
-  if (status === 'loading') return <LoadingPage />
+  const fakeContent = `Ridiculus mus mauris vitae ultricies leo integer malesuada nunc vel. Imperdiet massa
+          tincidunt nunc pulvinar sapien et ligula ullamcorper malesuada. Faucibus pulvinar
+          elementum integer enim neque volutpat. Gravida arcu ac tortor dignissim convallis aenean.
+          Lectus quam id leo in vitae. Ultricies tristique nulla aliquet enim tortor. Nec tincidunt
+          praesent semper feugiat nibh sed. Imperdiet proin fermentum leo vel orci porta non
+          pulvinar neque. Praesent semper feugiat nibh sed pulvinar proin gravida. Dis parturient
+          montes nascetur ridiculus mus mauris. Rhoncus dolor purus non enim praesent elementum
+          facilisis leo vel. Ut lectus arcu bibendum at. Integer enim neque volutpat ac. Diam sit
+          amet nisl suscipit. Eros donec ac odio tempor orci dapibus ultrices in iaculis.
+          Ullamcorper a lacus vestibulum sed arcu non odio euismod. Quis lectus nulla at volutpat
+          diam ut. Turpis egestas integer eget aliquet. Adipiscing tristique risus nec feugiat in
+          fermentum posuere. Morbi tempus iaculis urna id. Amet commodo nulla facilisi nullam
+          vehicula ipsum a arcu.`
 
   return (
     <>
       <Head>
         <title>Pivix homepage</title>
       </Head>
-      <Container
-        fluid
-        display='flex'
-        justify='center'
-        alignItems='center'
-        direction='column'
-        css={{
-          minHeight: '100vh',
-          height: '100%',
-        }}
-      >
-        {status === 'unauthenticated' && (
-          <Button
-            color='gradient'
-            size={'lg'}
-            onPress={() => signIn()}
-          >
-            Click to login
-          </Button>
-        )}
-        {status === 'authenticated' && (
-          <>
-            <Text
-              as={'div'}
-              css={{
-                textGradient: '45deg, $yellow500 -20%, $red600 100%',
-                fontSize: '$3xl',
-                py: '$10',
-              }}
-            >
-              Welcome {session.user.name}
-            </Text>
-            <Button
-              color={'error'}
-              shadow
-              bordered
-              ghost
-              css={{
-                fontSize: '$lg',
-                letterSpacing: '$wide',
-                textTransform: 'uppercase',
-                my: '$10',
-              }}
-              onPress={() => signOut()}
-            >
-              Log out
-            </Button>
-            <Button
-              color={'secondary'}
-              shadow
-              bordered
-              ghost
-              css={{
-                fontSize: '$lg',
-                letterSpacing: '$wide',
-                textTransform: 'uppercase',
-                my: '$10',
-              }}
-              onPress={() => {
-                if (!session.user.email) return
-                mutate({
-                  email: session.user.email,
-                })
-                reset()
-              }}
-              disabled={isLoading}
-            >
-              {isLoading && (
-                <Loading
-                  color='currentColor'
-                  size='sm'
-                />
-              )}
-              Unlink this account
-            </Button>
-          </>
-        )}
-      </Container>
+      {status === 'loading' ? (
+        <LoadingPage />
+      ) : (
+        <Box css={{ px: '$12', mt: '$8', '@xsMax': { px: '$10' } }}>
+          <Text h2>Lorem ipsum dolor sit amet</Text>
+          {[...Array(10).keys()].map((_, i) => (
+            <div key={i}>
+              <Text size='$lg'>{fakeContent}</Text>
+              <Spacer y={1} />
+            </div>
+          ))}
+        </Box>
+      )}
     </>
   )
+}
+
+Homepage.getLayout = (page: ReactElement) => {
+  return <Layout>{page}</Layout>
 }
 
 export default Homepage

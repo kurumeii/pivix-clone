@@ -10,6 +10,7 @@
     "postinstall": "npx prisma generate"
   },
   "dependencies": {
+    "@iconscout/react-unicons": "^1.1.6",
     "@next-auth/mongodb-adapter": "^1.1.1",
     "@next-auth/prisma-adapter": "^1.0.5",
     "@next/font": "13.0.7",

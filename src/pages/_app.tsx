@@ -1,35 +1,36 @@
-import { NextUIProvider } from '@nextui-org/react'
+import { createTheme, NextUIProvider } from '@nextui-org/react'
 import '@sweetalert2/themes/dark/dark.scss'
-import type { Session } from 'next-auth'
+
 import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider } from 'next-themes'
-import type { AppType } from 'next/dist/pages/_app'
+import type { AppPropsWithLayout } from '../types/page'
+
+import { darkThemeOptions, lightThemeOptions } from '../utils/themes'
 import { trpc } from '../utils/trpc'
 
-import { createTheme } from '@nextui-org/react'
-import { darkThemeOptions, lightThemeOptions } from '../utils/themes'
+const customeTheme = {
+  lightTheme: createTheme(lightThemeOptions),
+  darkTheme: createTheme(darkThemeOptions),
+}
 
-export const lightTheme = createTheme(lightThemeOptions)
-
-export const darkTheme = createTheme(darkThemeOptions)
-
-const App: AppType<{ session: Session | null }> = ({
-  Component,
-  pageProps: { session, ...pageProps },
-}) => {
+function App({ Component, pageProps }: AppPropsWithLayout) {
+  const { session } = pageProps
+  const getLayout = Component.getLayout || (page => page)
   return (
-    <SessionProvider session={session}>
+    <SessionProvider
+      session={session}
+      refetchInterval={10 * 60}
+      refetchWhenOffline={false}
+    >
       <ThemeProvider
         enableColorScheme
         attribute='class'
         value={{
-          light: lightTheme.className,
-          dark: darkTheme.className,
+          light: customeTheme.lightTheme.className,
+          dark: customeTheme.darkTheme.className,
         }}
       >
-        <NextUIProvider>
-          <Component {...pageProps} />
-        </NextUIProvider>
+        <NextUIProvider>{getLayout(<Component {...pageProps} />)}</NextUIProvider>
       </ThemeProvider>
     </SessionProvider>
   )

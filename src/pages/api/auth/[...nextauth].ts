@@ -8,6 +8,12 @@ import { prisma } from '../../../server/database/prismadb'
 
 export const authOpts: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
+  session: {
+    strategy: 'database',
+    maxAge: 2 * 24 * 60 * 60, //2 days
+    updateAge: 5 * 60 * 60,
+  },
+  debug: true,
   providers: [
     DiscrodProvider({
       clientId: process.env.DISCORD_ID || '',
@@ -34,14 +40,12 @@ export const authOpts: NextAuthOptions = {
     signIn: '/auth/signin',
   },
   callbacks: {
-    async session({ session, token }) {
-      // Send properties to the client, like an access_token and user id from a provider.
-      if (token.id && token.accessToken) {
-        session.accessToken = token.accessToken
-        session.user.id = token.id
-      }
-
+    async session({ session, user }) {
+      session.user.id = user.id
       return session
+    },
+    async redirect({ baseUrl }) {
+      return baseUrl
     },
   },
 }
