@@ -12,7 +12,7 @@ import { Box } from '../utils/themes'
 import { trpc } from '../utils/trpc'
 
 const Homepage: NextPageWithLayout = () => {
-  const { status } = useSession()
+  const { data: session, status } = useSession()
   // const router = useRouter()
 
   // const { isLoading, mutate, reset } = trpc.home.unlinkAccount.useMutation({
@@ -57,7 +57,7 @@ const Homepage: NextPageWithLayout = () => {
         <LoadingPage />
       ) : (
         <Box css={{ px: '$12', mt: '$8', '@xsMax': { px: '$10' } }}>
-          <Text h2>Lorem ipsum dolor sit amet</Text>
+          <Text h2>{session ? 'Welcome, ' + session.user.name : 'Lorem ipsum dolor sit amet'}</Text>
           {[...Array(10).keys()].map((_, i) => (
             <div key={i}>
               <Text size='$lg'>{fakeContent}</Text>

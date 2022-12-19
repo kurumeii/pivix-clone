@@ -1,7 +1,8 @@
-import { Container, Loading } from '@nextui-org/react'
+import { Container, Loading, useTheme } from '@nextui-org/react'
 import React from 'react'
 
 function LoadingPage() {
+  const { isDark } = useTheme()
   return (
     <>
       <Container
@@ -17,6 +18,7 @@ function LoadingPage() {
         <Loading
           type='points'
           size='lg'
+          color={isDark ? 'white' : 'error'}
         />
       </Container>
     </>

@@ -1,24 +1,29 @@
-import { Container, Loading } from '@nextui-org/react'
+import { Loading, Navbar, useTheme } from '@nextui-org/react'
 import React from 'react'
 
 function LoadingNavbar() {
+  const { isDark } = useTheme()
   return (
     <>
-      <Container
-        fluid
-        display='flex'
-        justify='center'
-        alignItems='center'
-        css={{
-          minHeight: '100vh',
-          height: '100%',
-        }}
+      <Navbar
+        maxWidth={'fluid'}
+        isBordered
       >
-        <Loading
-          type='points-opacity'
-          size='lg'
-        />
-      </Container>
+        <Navbar.Content
+          css={{
+            w: '100%',
+            jc: 'center',
+          }}
+        >
+          <Navbar.Item>
+            <Loading
+              type='points-opacity'
+              size='lg'
+              color={isDark ? 'white' : 'error'}
+            />
+          </Navbar.Item>
+        </Navbar.Content>
+      </Navbar>
     </>
   )
 }
