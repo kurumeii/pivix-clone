@@ -59,7 +59,7 @@ function SharedNavbar() {
               <Navbar.Link
                 isActive={pathname === item.link}
                 css={{
-                  textTransform: 'capitalize',
+                  textTransform: 'uppercase',
                 }}
               >
                 {item.name}

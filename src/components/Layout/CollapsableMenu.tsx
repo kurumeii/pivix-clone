@@ -1,8 +1,9 @@
 import { UilSignin, UilSunset, UilWindMoon } from '@iconscout/react-unicons'
-import { Button, Link, Navbar, useTheme } from '@nextui-org/react'
+import { Button, Link, Navbar, User, useTheme } from '@nextui-org/react'
 import { signIn, signOut, useSession } from 'next-auth/react'
 import { useTheme as useNextTheme } from 'next-themes'
 import NextLink from 'next/link'
+import { useRouter } from 'next/router'
 import type { HeaderContent } from '../../interfaces/navbar'
 
 const collapsableItems: HeaderContent = [
@@ -12,9 +13,10 @@ const collapsableItems: HeaderContent = [
 ]
 
 function CollapsableMenu() {
-  const { status } = useSession()
+  const { data: session, status } = useSession()
   const { isDark } = useTheme()
   const { setTheme } = useNextTheme()
+  const router = useRouter()
 
   return (
     <Navbar.Collapse>
@@ -30,7 +32,7 @@ function CollapsableMenu() {
               block
               css={{
                 minWidth: '100%',
-                textTransform: 'capitalize',
+                textTransform: 'uppercase',
                 justifyContent: 'center',
                 flex: 1,
               }}
@@ -40,27 +42,12 @@ function CollapsableMenu() {
           </NextLink>
         </Navbar.CollapseItem>
       ))}
-
       <Navbar.CollapseItem
         css={{
           jc: 'center',
-        }}
-      >
-        <Button
-          css={{
-            width: '60%',
-          }}
-          ghost={isDark}
-          shadow={isDark}
-          color={isDark ? 'error' : 'secondary'}
-          onPress={() => setTheme(isDark ? 'light' : 'dark')}
-          icon={isDark ? <UilWindMoon /> : <UilSunset />}
-        />
-      </Navbar.CollapseItem>
-
-      <Navbar.CollapseItem
-        css={{
-          jc: 'center',
+          ai: 'center',
+          fw: 'wrap',
+          gap: '$10',
         }}
       >
         {status === 'unauthenticated' && (
@@ -70,7 +57,7 @@ function CollapsableMenu() {
             }}
             ghost={isDark}
             shadow={isDark}
-            color={'gradient'}
+            color={isDark ? 'error' : 'secondary'}
             onPress={() => signIn()}
             icon={<UilSignin />}
           >
@@ -78,18 +65,39 @@ function CollapsableMenu() {
           </Button>
         )}
         {status === 'authenticated' && (
-          <Button
-            css={{
-              width: '60%',
-            }}
-            ghost={isDark}
-            shadow={isDark}
-            color={'gradient'}
-            onPress={() => signOut()}
-          >
-            Change account
-          </Button>
+          <>
+            <User
+              src={session.user.image || '/public/avatar-placeholder.png'}
+              name={session.user.name}
+              description={session.user.email}
+              size='xl'
+              pointer
+              onClick={() => {
+                /* TODO: Add profile page   */
+                router.push('/')
+              }}
+              title='To profile'
+            />
+            <Button
+              auto
+              ghost
+              shadow={isDark}
+              color={isDark ? 'error' : 'secondary'}
+              onPress={() => signOut()}
+            >
+              Change account
+            </Button>
+          </>
         )}
+
+        <Button
+          auto
+          ghost
+          shadow={isDark}
+          color={isDark ? 'error' : 'secondary'}
+          onPress={() => setTheme(isDark ? 'light' : 'dark')}
+          icon={isDark ? <UilWindMoon /> : <UilSunset />}
+        />
       </Navbar.CollapseItem>
     </Navbar.Collapse>
   )
