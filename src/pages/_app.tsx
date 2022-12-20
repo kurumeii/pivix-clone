@@ -1,10 +1,9 @@
 import { createTheme, NextUIProvider } from '@nextui-org/react'
 import '@sweetalert2/themes/dark/dark.scss'
-
 import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider } from 'next-themes'
 import type { AppPropsWithLayout } from '../types/page'
-
+import { getDayOrNightheme } from '../utils/helpers'
 import { darkThemeOptions, lightThemeOptions } from '../utils/themes'
 import { trpc } from '../utils/trpc'
 
@@ -24,6 +23,7 @@ function App({ Component, pageProps }: AppPropsWithLayout) {
     >
       <ThemeProvider
         enableColorScheme
+        defaultTheme={getDayOrNightheme()}
         attribute='class'
         value={{
           light: customeTheme.lightTheme.className,

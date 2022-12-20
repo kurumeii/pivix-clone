@@ -28,6 +28,7 @@ function SharedNavbar() {
       <Navbar
         maxWidth={'fluid'}
         isBordered={isDark}
+        shouldHideOnScroll
       >
         <Navbar.Brand>
           <Navbar.Toggle showIn={'md'} />
@@ -43,8 +44,10 @@ function SharedNavbar() {
         {/* Main header */}
         <Navbar.Content
           hideIn='md'
-          activeColor={'primary'}
+          activeColor={isDark ? 'error' : 'secondary'}
           enableCursorHighlight
+          variant={'underline-rounded'}
+          gap={'$15'}
         >
           {collapsableItems.map(item => (
             <NextLink
@@ -54,9 +57,7 @@ function SharedNavbar() {
               legacyBehavior
             >
               <Navbar.Link
-                color={'secondary'}
                 isActive={pathname === item.link}
-                variant={isDark ? 'highlight-solid-rounded' : 'highlight-rounded'}
                 css={{
                   textTransform: 'capitalize',
                 }}
