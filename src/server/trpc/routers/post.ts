@@ -36,6 +36,7 @@ export const postRouter = router({
           title,
           description,
           email,
+          created_at: new Date(),
           images: {
             create: secure_imgs.map(img => ({
               url: img.secure_url,

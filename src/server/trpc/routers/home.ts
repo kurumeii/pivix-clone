@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { prisma } from '../../database/prismadb'
 import { procedure, protectedProcedure, router } from '../trpc'
 
 export const homeRouter = router({
@@ -21,4 +22,14 @@ export const homeRouter = router({
         resultMess: 'Successfully unlinked',
       }
     }),
+  fetchRecentPosts: procedure.query(async () => {
+    const posts = await prisma.post.findMany({
+      orderBy: {
+        created_at: 'desc',
+      },
+    })
+    return {
+      posts,
+    }
+  }),
 })

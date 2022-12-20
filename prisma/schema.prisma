@@ -62,11 +62,12 @@ model VerificationToken {
 }
 
 model Post {
-  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
   email       String
-  user        User    @relation(fields: [email], references: [email])
+  user        User     @relation(fields: [email], references: [email])
   title       String
   description String
+  created_at  DateTime
   images      Image[]
 
   @@unique([title])

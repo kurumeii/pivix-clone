@@ -45,7 +45,7 @@ function SharedNavbar() {
           hideIn='md'
           activeColor={isDark ? 'error' : 'secondary'}
           enableCursorHighlight
-          variant={'underline-rounded'}
+          variant={'highlight'}
           gap={'$15'}
         >
           {collapsableItems.map(item => (

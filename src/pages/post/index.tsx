@@ -10,6 +10,7 @@ import {
   Textarea,
   useTheme,
 } from '@nextui-org/react'
+import { TRPCError } from '@trpc/server'
 import { useSession } from 'next-auth/react'
 import Head from 'next/head'
 import type { ReactElement } from 'react'
@@ -24,13 +25,14 @@ import { trpc } from '../../utils/trpc'
 
 const Post: NextPageWithLayout = () => {
   const { isDark } = useTheme()
+  const [isLoading, setLoading] = useState(false)
   const { data: session, status } = useSession()
   const [field, setField] = useState({
     title: '',
     description: '',
   })
   const [files, setFiles] = useState<MyFiles[]>([])
-  const { isLoading, mutate } = trpc.post.create.useMutation({
+  const { mutate } = trpc.post.create.useMutation({
     onError(error) {
       Toast.fire({
         icon: 'error',
@@ -38,47 +40,62 @@ const Post: NextPageWithLayout = () => {
         text: error.message,
       })
     },
-    onSuccess({ createdPost }) {
-      Toast.fire({
-        timer: 2000,
+    async onSuccess({ createdPost }) {
+      const { isDismissed } = await Toast.fire({
         icon: 'success',
         title: successTitle('Success'),
         text: 'post ' + createdPost.id + ' created',
       })
+      if (isDismissed) {
+        setField({
+          description: '',
+          title: '',
+        })
+        setFiles([])
+      }
     },
   })
 
-  // const isLoading = false
   const handleCreatNew = async () => {
     const form = new FormData()
     const url = process.env.NEXT_PUBLIC_CLOUDINARY_API || ''
-    const results = await Promise.all(
-      files.map(async file => {
-        form.append('file', file)
-        form.append('upload_preset', 'myclouduploads')
-        const fetching = await fetch(url, {
-          method: 'POST',
-          body: form,
+    try {
+      setLoading(true)
+      const results = await Promise.all(
+        files.map(async file => {
+          form.append('file', file)
+          form.append('upload_preset', 'myclouduploads')
+          const fetching = await fetch(url, {
+            method: 'POST',
+            body: form,
+          })
+          const { secure_url, original_filename }: CloudinaryResponse = await fetching.json()
+          return {
+            secure_url,
+            original_filename,
+          }
         })
-        const { secure_url, original_filename }: CloudinaryResponse = await fetching.json()
-        return {
-          secure_url,
-          original_filename,
-        }
+      )
+      if (!session)
+        return Toast.fire({
+          icon: 'error',
+          title: errorTitle('Session timed out'),
+        })
+      await mutate({
+        title: field.title,
+        description: field.description,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        email: session.user.email!,
+        secure_imgs: results,
       })
-    )
-    if (!session)
-      return Toast.fire({
-        icon: 'error',
-        title: errorTitle('Session timed out'),
-      })
-    await mutate({
-      title: field.title,
-      description: field.description,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      email: session.user.email!,
-      secure_imgs: results,
-    })
+      setLoading(false)
+    } catch (error) {
+      if (error instanceof Error || error instanceof TRPCError)
+        return Toast.fire({
+          icon: 'error',
+          title: errorTitle(error.message),
+        })
+    }
   }
 
   return (
@@ -86,6 +103,16 @@ const Post: NextPageWithLayout = () => {
       <Head>
         <title>Post new image</title>
       </Head>
+      {isLoading && (
+        <Progress
+          indeterminated
+          size={'xs'}
+          value={50}
+          shadow={isDark}
+          color={isDark ? 'error' : 'secondary'}
+          status={isDark ? 'default' : 'secondary'}
+        />
+      )}
       <Box>
         {!session && (
           <Container>
@@ -179,19 +206,6 @@ const Post: NextPageWithLayout = () => {
                     justify='center'
                     gap={4}
                   >
-                    <Grid
-                      xs={12}
-                      justify='center'
-                    >
-                      {isLoading && (
-                        <Progress
-                          indeterminated
-                          value={50}
-                          color={isDark ? 'error' : 'secondary'}
-                          status={isDark ? 'default' : 'secondary'}
-                        />
-                      )}
-                    </Grid>
                     <Grid>
                       <Button
                         size='lg'
