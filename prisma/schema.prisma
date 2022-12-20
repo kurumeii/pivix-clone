@@ -46,6 +46,7 @@ model User {
   password      String?
   accounts      Account[]
   sessions      Session[]
+  post          Post[]
 
   @@map("users")
 }
@@ -58,4 +59,26 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verification_tokens")
+}
+
+model Post {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  email       String
+  user        User    @relation(fields: [email], references: [email])
+  title       String
+  description String
+  images      Image[]
+
+  @@unique([title])
+  @@map("post")
+}
+
+model Image {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  imageName String
+  url       String
+  postId    String
+  post      Post   @relation(fields: [postId], references: [id])
+
+  @@map("image")
 }

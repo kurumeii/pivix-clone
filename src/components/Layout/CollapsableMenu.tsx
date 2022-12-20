@@ -4,13 +4,7 @@ import { signIn, signOut, useSession } from 'next-auth/react'
 import { useTheme as useNextTheme } from 'next-themes'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
-import type { HeaderContent } from '../../interfaces/navbar'
-
-const collapsableItems: HeaderContent = [
-  { name: 'homepage', link: '/' },
-  { name: 'collection', link: '#' },
-  { name: 'post image', link: '#' },
-]
+import { collapsableItems } from './SharedNavbar'
 
 function CollapsableMenu() {
   const { data: session, status } = useSession()
@@ -69,7 +63,7 @@ function CollapsableMenu() {
             <User
               src={session.user.image || '/public/avatar-placeholder.png'}
               name={session.user.name}
-              description={session.user.email}
+              description={session.user.email || 'Anon'}
               size='xl'
               pointer
               onClick={() => {

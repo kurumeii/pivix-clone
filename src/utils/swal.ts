@@ -16,7 +16,8 @@ export const Toast = swal.mixin({
   },
 })
 
-export const errorTitle = (text: string) =>
+export const errorTitle = (text?: string) =>
   `<h4 style='color: #d63051 !important'>There has been an error: ${text}</h4>`
 
-export const successTitle = (text: string) => `<h4 style='color: #e63946 !important'>${text}</h4>`
+export const successTitle = (text?: string) =>
+  `<h4 style='color: #e63946 !important'>${text || 'Successfully'}</h4>`

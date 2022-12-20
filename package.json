@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "db": "npx prisma generate",
     "postinstall": "npx prisma generate"
   },
   "dependencies": {
@@ -23,7 +24,6 @@
     "@trpc/react-query": "^10.5.0",
     "@trpc/server": "^10.5.0",
     "bson": "^4.7.0",
-    "cloudinary": "^1.33.0",
     "eslint": "8.29.0",
     "eslint-config-next": "13.0.7",
     "md5": "^2.3.0",
@@ -34,10 +34,12 @@
     "nodemailer": "^6.8.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-dropzone": "^14.2.3",
     "react-iconly": "^2.2.5",
     "superjson": "^1.12.0",
     "sweetalert2": "^11.6.15",
     "sweetalert2-react-content": "^5.0.7",
+    "swr": "^2.0.0",
     "typescript": "4.9.4",
     "zod": "^3.20.2",
     "zustand": "^4.1.5"
@@ -54,3 +56,4 @@
     "ts-node": "^10.9.1"
   }
 }
+

@@ -9,18 +9,17 @@ import { Logout } from 'react-iconly'
 import type { HeaderContent } from '../../interfaces/navbar'
 import LoadingNavbar from '../LoadingNavbar'
 import CollapsableMenu from './CollapsableMenu'
+export const collapsableItems: HeaderContent = [
+  { name: 'homepage', link: '/' },
+  { name: 'collection', link: '#' },
+  { name: 'post image', link: '/post' },
+]
 
 function SharedNavbar() {
   const { data: session, status } = useSession()
   const { isDark } = useTheme()
   const { pathname } = useRouter()
   const { setTheme } = useNextTheme()
-
-  const collapsableItems: HeaderContent = [
-    { name: 'homepage', link: '/' },
-    { name: 'collection', link: '#' },
-    { name: 'post image', link: '#' },
-  ]
 
   if (status === 'loading') return <LoadingNavbar />
   return (

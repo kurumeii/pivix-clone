@@ -1,13 +1,19 @@
-export const getDayOrNightheme = (): 'dark' | 'night' => {
+export const getDayOrNightheme = () => {
   const timeNow = new Date().getHours()
   const day = {
       hours: 7,
-      theme: 'light',
     },
     night = {
       hours: 18,
-      theme: 'dark',
     }
-
-  return (timeNow >= day.hours) & (timeNow < night.hours) ? day.theme : night.theme
+  if (timeNow >= day.hours && timeNow < night.hours) return 'light'
+  return 'dark'
 }
+
+export const fetchData = (url: string) => fetch(url).then(res => res.json())
+
+export const sendData = (url: string, formData: FormData) =>
+  fetch(url, {
+    method: 'POST',
+    body: formData,
+  }).then(res => res.json())
