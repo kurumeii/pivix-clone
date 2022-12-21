@@ -2,6 +2,7 @@ import { Card, Grid, Text, useTheme } from '@nextui-org/react'
 import { useEffect } from 'react'
 import { useDropzone } from 'react-dropzone'
 import type { MyDropzoneProps, MyFiles } from '../interfaces/dropzone'
+import { errorTitle, Toast } from '../utils/swal'
 import { DropzoneContainer } from '../utils/themes'
 
 function MyDropzone({ files, onChangeEvent }: MyDropzoneProps) {
@@ -27,6 +28,20 @@ function MyDropzone({ files, onChangeEvent }: MyDropzoneProps) {
         return filterDub
       })
     },
+    maxSize: 10485760,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onDropRejected: async (fileRejections, event) => {
+      const text = fileRejections
+        .map(({ errors, file }) => {
+          return file.name + ': ' + errors.map(err => err.message)
+        })
+        .join(', ')
+      await Toast.fire({
+        icon: 'error',
+        title: errorTitle(),
+        text,
+      })
+    },
   })
 
   useEffect(() => {
@@ -42,24 +57,25 @@ function MyDropzone({ files, onChangeEvent }: MyDropzoneProps) {
         borderColor: isDark ? '$accents1' : '$accents4',
       }}
     >
-      <input {...getInputProps()} />
-      <Text
-        b
-        css={{ ai: 'center', my: '$5' }}
-      >
+      <Text css={{ ai: 'center', my: '$5', color: !isDark ? '$accents5' : '' }}>
         Drag &apos;n&apos; drop some files here, or click to select files
+        <br />
       </Text>
-
       <aside>
+        <input {...getInputProps()} />
         <Grid.Container
           gap={2}
           justify='center'
+          alignItems={'stretch'}
+          css={{
+            flexWrap: 'wrap',
+          }}
         >
           {files.map(file => (
             <Grid
               key={file.name}
               xs={12}
-              md={6}
+              sm={6}
               lg={4}
             >
               <Card isHoverable>
@@ -68,20 +84,27 @@ function MyDropzone({ files, onChangeEvent }: MyDropzoneProps) {
                   alt={file.name}
                   css={{
                     aspectRatio: '1',
+                    objectPosition: 'top',
                   }}
                   objectFit={'cover'}
                 />
                 <Card.Footer
                   css={{
-                    justifyItems: 'center',
+                    flexGrow: 1,
+                    justifyContent: 'flex-end',
                     flexDirection: 'column',
-                    textOverflow: 'clip',
-                    overflow: 'hidden',
                   }}
                 >
-                  <Text b>{file.name}</Text>
-                  <Text css={{ color: '$accents7', fontWeight: '$semibold', fontSize: '$sm' }}>
-                    {file.size}
+                  <Text
+                    b
+                    css={{
+                      ov: 'clip',
+                      textOverflow: 'ellipsis',
+                      w: '100%',
+                      textAlign: 'center',
+                    }}
+                  >
+                    {file.name}
                   </Text>
                 </Card.Footer>
               </Card>

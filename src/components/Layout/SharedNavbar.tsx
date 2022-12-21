@@ -27,7 +27,7 @@ function SharedNavbar() {
       <Navbar
         maxWidth={'fluid'}
         isBordered={isDark}
-        shouldHideOnScroll
+        variant={'sticky'}
       >
         <Navbar.Brand>
           <Navbar.Toggle showIn={'md'} />
@@ -96,7 +96,7 @@ function SharedNavbar() {
                 color={'gradient'}
                 shadow={isDark}
                 ghost={isDark}
-                onPress={() => signIn()}
+                onClick={() => signIn()}
                 icon={<UilSignin />}
               >
                 Login

@@ -136,7 +136,7 @@ function Signin({ providers }: InferGetServerSidePropsType<typeof getServerSideP
                             fontSize: '$lg',
                             letterSpacing: '$wider',
                           }}
-                          onPress={() => signIn(provider.id)}
+                          onClick={() => signIn(provider.id)}
                         >
                           Sign in with {provider.name}
                         </Button>
@@ -182,7 +182,7 @@ function Signin({ providers }: InferGetServerSidePropsType<typeof getServerSideP
 
                 <LoginButton
                   loading={isLoading}
-                  onPressHandler={() =>
+                  onClickHandler={() =>
                     signIn('email', {
                       email: fieldValue,
                     })

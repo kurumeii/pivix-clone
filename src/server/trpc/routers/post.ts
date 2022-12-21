@@ -7,11 +7,16 @@ export const postRouter = router({
   create: procedure
     .input(
       z.object({
-        title: z.string().trim(),
+        title: z.string().trim().min(1, {
+          message: 'Title is required',
+        }),
         description: z.string().trim(),
         secure_imgs: z
           .object({
+            public_id: z.string(),
+            url: z.string(),
             secure_url: z.string(),
+            folder: z.string(),
             original_filename: z.string(),
           })
           .array(),
@@ -20,6 +25,11 @@ export const postRouter = router({
     )
     .mutation(async ({ input }) => {
       const { title, description, email, secure_imgs } = input
+      if (secure_imgs.length === 0)
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Images cannot be empty',
+        })
       const findUniqueTitle = await prisma.post.findUnique({
         where: {
           title,
@@ -39,8 +49,11 @@ export const postRouter = router({
           created_at: new Date(),
           images: {
             create: secure_imgs.map(img => ({
-              url: img.secure_url,
-              imageName: img.original_filename,
+              imageName: img.public_id,
+              url: img.url,
+              secureUrl: img.secure_url,
+              folder: img.folder,
+              original_filename: img.original_filename,
             })),
           },
         },

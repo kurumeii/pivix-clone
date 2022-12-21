@@ -27,6 +27,9 @@ export const homeRouter = router({
       orderBy: {
         created_at: 'desc',
       },
+      include: {
+        images: true,
+      },
     })
     return {
       posts,

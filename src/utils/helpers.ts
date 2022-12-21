@@ -1,3 +1,5 @@
+import type { CloudinaryAPIAction, CloudinaryResourceType } from '../interfaces/cloudinary'
+
 export const getDayOrNightheme = () => {
   const timeNow = new Date().getHours()
   const day = {
@@ -17,3 +19,13 @@ export const sendData = (url: string, formData: FormData) =>
     method: 'POST',
     body: formData,
   }).then(res => res.json())
+
+export const cloudinaryAPIAction = (
+  action: CloudinaryAPIAction,
+  resource_type?: CloudinaryResourceType
+) =>
+  process.env.NEXT_PUBLIC_CLOUDINARY_API
+    ? `${process.env.NEXT_PUBLIC_CLOUDINARY_API}${
+        resource_type ? '/' + resource_type : ''
+      }/${action}`
+    : ''

@@ -1,11 +1,11 @@
 import { Button, Col, Loading, Row } from '@nextui-org/react'
 
 interface ButtonProp {
-  onPressHandler: () => void
+  onClickHandler: () => void
   loading: boolean
 }
 
-function LoginButton({ loading, onPressHandler }: ButtonProp) {
+function LoginButton({ loading, onClickHandler }: ButtonProp) {
   return (
     <>
       <Row fluid>
@@ -13,7 +13,7 @@ function LoginButton({ loading, onPressHandler }: ButtonProp) {
           <Button
             ghost
             color={'secondary'}
-            onPress={onPressHandler}
+            onClick={onClickHandler}
             disabled={loading}
             css={{
               w: '100%',

@@ -52,7 +52,7 @@ function CollapsableMenu() {
             ghost={isDark}
             shadow={isDark}
             color={isDark ? 'error' : 'secondary'}
-            onPress={() => signIn()}
+            onClick={() => signIn()}
             icon={<UilSignin />}
           >
             Login
@@ -77,7 +77,7 @@ function CollapsableMenu() {
               ghost
               shadow={isDark}
               color={isDark ? 'error' : 'secondary'}
-              onPress={() => signOut()}
+              onClick={() => signOut()}
             >
               Change account
             </Button>
@@ -89,7 +89,7 @@ function CollapsableMenu() {
           ghost
           shadow={isDark}
           color={isDark ? 'error' : 'secondary'}
-          onPress={() => setTheme(isDark ? 'light' : 'dark')}
+          onClick={() => setTheme(isDark ? 'light' : 'dark')}
           icon={isDark ? <UilWindMoon /> : <UilSunset />}
         />
       </Navbar.CollapseItem>
