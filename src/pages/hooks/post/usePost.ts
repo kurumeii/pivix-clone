@@ -21,10 +21,12 @@ export default function usePost() {
   const handleCreatNew = async () => {
     const form = new FormData()
     setLoading(true)
+    if (!sessionData) return false
     const results = await Promise.all(
       files.map(async file => {
         form.append('file', file)
         form.append('upload_preset', 'myclouduploads')
+        form.append('folder', sessionData.user.id)
         const fetching = await fetch(cloudinaryAPIAction('upload', 'image'), {
           method: 'POST',
           body: form,

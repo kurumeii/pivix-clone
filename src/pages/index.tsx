@@ -1,7 +1,8 @@
-import { Card, Grid, Text } from '@nextui-org/react'
+import { Card, Col, Grid, Text } from '@nextui-org/react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/dist/client/router'
 import Head from 'next/head'
+import Image from 'next/image'
 import type { ReactElement } from 'react'
 import { useEffect } from 'react'
 import Layout from '../components/Layout/Layout'
@@ -9,7 +10,6 @@ import LoadingPage from '../components/LoadingPage'
 import type { NextPageWithLayout } from '../types/page'
 import { Box, NavigateSlide, SlideItem, SlideShowContainer } from '../utils/themes'
 import { trpc } from '../utils/trpc'
-import Image from 'next/image'
 
 const Homepage: NextPageWithLayout = () => {
   const { data: session, status } = useSession()
@@ -36,15 +36,40 @@ const Homepage: NextPageWithLayout = () => {
           <Grid.Container
             gap={2}
             justify='center'
+            alignItems='center'
           >
             {fetchRecentPosts.data.posts.map(post => (
               <Grid
                 xs={12}
                 md={6}
                 key={post.id}
+                justify='center'
               >
-                <Card isHoverable>
-                  <Card.Body>
+                <Card
+                  isHoverable
+                  css={{ mw: 'max-content', w: '100%' }}
+                >
+                  <Card.Header css={{ position: 'absolute', zIndex: 1, bottom: 5 }}>
+                    <Col>
+                      <Text
+                        size={12}
+                        weight='bold'
+                        transform='uppercase'
+                        css={{
+                          textGradient: '45deg, $blue600 -20%, $pink600 50%',
+                        }}
+                      >
+                        Supercharged
+                      </Text>
+                      <Text
+                        h4
+                        color='white'
+                      >
+                        Creates beauty like a beast
+                      </Text>
+                    </Col>
+                  </Card.Header>
+                  <Card.Body css={{ p: 0 }}>
                     <SlideShowContainer>
                       <NavigateSlide
                         css={{

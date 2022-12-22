@@ -59,7 +59,7 @@ export const NavigateSlide = styled('a', {
   '&:hover': {
     bgColor: 'rgba(0,0,0,0.8)',
   },
-  zIndex: 2,
+  zIndex: 3,
 })
 
 export const SlideDot = styled('span', {

@@ -22,6 +22,14 @@ export interface CloudinaryResult {
   result: string
 }
 
+export interface CloudinaryAdminResult {
+  folders: {
+    name: string
+    path: string
+  }[]
+  total_count: number
+}
+
 export type CloudinaryAPIAction =
   | 'upload'
   | 'delete_by_token'
